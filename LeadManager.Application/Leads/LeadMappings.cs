@@ -13,8 +13,14 @@ internal static class LeadMappings
             lead.Company,
             lead.JobTitle,
             lead.Source,
+            lead.Region,
+            lead.LeadType,
+            lead.ProductInterest,
+            lead.Cnpj,
+            lead.AssignedTo,
             lead.Score,
             lead.Temperature.ToString(),
             lead.Status.ToString(),
-            lead.CreatedAtUtc);
+            lead.CreatedAtUtc,
+            lead.UpdatedAtUtc);
 }

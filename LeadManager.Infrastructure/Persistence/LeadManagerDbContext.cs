@@ -9,6 +9,8 @@ public sealed class LeadManagerDbContext : DbContext
     }
 
     internal DbSet<LeadRecord> Leads => Set<LeadRecord>();
+    internal DbSet<LeadHistoryRecord> LeadHistory => Set<LeadHistoryRecord>();
+    internal DbSet<RoundRobinStateRecord> RoundRobinStates => Set<RoundRobinStateRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -12,10 +12,16 @@ public sealed class Lead
     public string Company { get; private set; }
     public string JobTitle { get; private set; }
     public string Source { get; private set; }
+    public string Region { get; private set; }
+    public string LeadType { get; private set; }
+    public string ProductInterest { get; private set; }
+    public string Cnpj { get; private set; }
+    public string AssignedTo { get; private set; }
     public int Score { get; private set; }
     public LeadTemperature Temperature { get; private set; }
     public LeadStatus Status { get; private set; }
     public DateTime CreatedAtUtc { get; private set; }
+    public DateTime UpdatedAtUtc { get; private set; }
 
     private Lead(
         Guid id,
@@ -25,10 +31,16 @@ public sealed class Lead
         string company,
         string jobTitle,
         string source,
+        string region,
+        string leadType,
+        string productInterest,
+        string cnpj,
+        string assignedTo,
         int score,
         LeadTemperature temperature,
         LeadStatus status,
-        DateTime createdAtUtc)
+        DateTime createdAtUtc,
+        DateTime updatedAtUtc)
     {
         Id = id;
         Name = name;
@@ -37,10 +49,16 @@ public sealed class Lead
         Company = company;
         JobTitle = jobTitle;
         Source = source;
+        Region = region;
+        LeadType = leadType;
+        ProductInterest = productInterest;
+        Cnpj = cnpj;
+        AssignedTo = assignedTo;
         Score = score;
         Temperature = temperature;
         Status = status;
         CreatedAtUtc = createdAtUtc;
+        UpdatedAtUtc = updatedAtUtc;
     }
 
     public static Lead Create(
@@ -50,6 +68,10 @@ public sealed class Lead
         string company,
         string jobTitle,
         string source,
+        string region,
+        string leadType,
+        string productInterest,
+        string cnpj,
         DateTime? createdAtUtc = null)
     {
         var normalizedName = ValidateName(name);
@@ -58,6 +80,11 @@ public sealed class Lead
         var normalizedCompany = NormalizeOptional(company);
         var normalizedJobTitle = NormalizeOptional(jobTitle);
         var normalizedSource = ValidateSource(source);
+        var normalizedRegion = ValidateRegion(region);
+        var normalizedLeadType = NormalizeOptional(leadType);
+        var normalizedProductInterest = NormalizeOptional(productInterest);
+        var normalizedCnpj = ValidateCnpj(cnpj);
+        var now = createdAtUtc ?? DateTime.UtcNow;
 
         var lead = new Lead(
             Guid.NewGuid(),
@@ -67,10 +94,16 @@ public sealed class Lead
             normalizedCompany,
             normalizedJobTitle,
             normalizedSource,
+            normalizedRegion,
+            normalizedLeadType,
+            normalizedProductInterest,
+            normalizedCnpj,
+            string.Empty,
             0,
             LeadTemperature.Cold,
             LeadStatus.New,
-            createdAtUtc ?? DateTime.UtcNow);
+            now,
+            now);
 
         lead.RecalculateScore();
         return lead;
@@ -84,10 +117,16 @@ public sealed class Lead
         string company,
         string jobTitle,
         string source,
+        string region,
+        string leadType,
+        string productInterest,
+        string cnpj,
+        string assignedTo,
         int score,
         LeadTemperature temperature,
         LeadStatus status,
-        DateTime createdAtUtc)
+        DateTime createdAtUtc,
+        DateTime updatedAtUtc)
     {
         if (id == Guid.Empty)
         {
@@ -99,6 +138,11 @@ public sealed class Lead
             throw new ArgumentException("Lead creation date is required.", nameof(createdAtUtc));
         }
 
+        if (updatedAtUtc == default)
+        {
+            throw new ArgumentException("Lead update date is required.", nameof(updatedAtUtc));
+        }
+
         return new Lead(
             id,
             ValidateName(name),
@@ -107,10 +151,16 @@ public sealed class Lead
             NormalizeOptional(company),
             NormalizeOptional(jobTitle),
             ValidateSource(source),
+            ValidateRegion(region),
+            NormalizeOptional(leadType),
+            NormalizeOptional(productInterest),
+            ValidateCnpj(cnpj),
+            NormalizeOptional(assignedTo),
             score < 0 ? throw new ArgumentOutOfRangeException(nameof(score), "Lead score cannot be negative.") : score,
             temperature,
             status,
-            DateTime.SpecifyKind(createdAtUtc, DateTimeKind.Utc));
+            DateTime.SpecifyKind(createdAtUtc, DateTimeKind.Utc),
+            DateTime.SpecifyKind(updatedAtUtc, DateTimeKind.Utc));
     }
 
     public void RecalculateScore()
@@ -134,6 +184,8 @@ public sealed class Lead
             <= 60 => LeadTemperature.Warm,
             _ => LeadTemperature.Hot
         };
+
+        Touch();
     }
 
     public void ChangeStatus(LeadStatus status)
@@ -162,7 +214,22 @@ public sealed class Lead
         }
 
         Status = status;
+        Touch();
     }
+
+    public void AssignTo(string assignedTo)
+    {
+        var normalizedAssignee = NormalizeOptional(assignedTo);
+        if (string.Equals(AssignedTo, normalizedAssignee, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        AssignedTo = normalizedAssignee;
+        Touch();
+    }
+
+    private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
 
     private static int GetSourceScore(string source) => source.ToLowerInvariant() switch
     {
@@ -219,7 +286,7 @@ public sealed class Lead
 
     private static string ValidateEmail(string email)
     {
-        var normalized = email?.Trim() ?? string.Empty;
+        var normalized = email?.Trim().ToLowerInvariant() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(normalized))
         {
             throw new ArgumentException("Lead email is required.", nameof(email));
@@ -236,14 +303,13 @@ public sealed class Lead
 
     private static string ValidatePhone(string phone)
     {
-        var normalized = phone?.Trim() ?? string.Empty;
+        var normalized = NormalizeDigits(phone);
         if (string.IsNullOrWhiteSpace(normalized))
         {
             throw new ArgumentException("Lead phone is required.", nameof(phone));
         }
 
-        var digitCount = normalized.Count(char.IsDigit);
-        if (digitCount < 10)
+        if (normalized.Length < 10)
         {
             throw new ArgumentException("Lead phone is invalid.", nameof(phone));
         }
@@ -262,5 +328,42 @@ public sealed class Lead
         return normalized;
     }
 
+    private static string ValidateRegion(string region)
+    {
+        var normalized = region?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            throw new ArgumentException("Lead region is required.", nameof(region));
+        }
+
+        return normalized;
+    }
+
+    private static string ValidateCnpj(string cnpj)
+    {
+        var normalized = NormalizeDigits(cnpj);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return string.Empty;
+        }
+
+        if (normalized.Length != 14)
+        {
+            throw new ArgumentException("Lead CNPJ is invalid.", nameof(cnpj));
+        }
+
+        return normalized;
+    }
+
     private static string NormalizeOptional(string value) => value?.Trim() ?? string.Empty;
+
+    private static string NormalizeDigits(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        return new string(value.Where(char.IsDigit).ToArray());
+    }
 }

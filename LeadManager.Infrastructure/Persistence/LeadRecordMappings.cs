@@ -14,10 +14,16 @@ internal static class LeadRecordMappings
             Company = lead.Company,
             JobTitle = lead.JobTitle,
             Source = lead.Source,
+            Region = lead.Region,
+            LeadType = lead.LeadType,
+            ProductInterest = lead.ProductInterest,
+            Cnpj = lead.Cnpj,
+            AssignedTo = lead.AssignedTo,
             Score = lead.Score,
             Temperature = (int)lead.Temperature,
             Status = (int)lead.Status,
-            CreatedAtUtc = lead.CreatedAtUtc
+            CreatedAtUtc = lead.CreatedAtUtc,
+            UpdatedAtUtc = lead.UpdatedAtUtc
         };
 
     public static Lead ToDomain(this LeadRecord lead) =>
@@ -29,10 +35,16 @@ internal static class LeadRecordMappings
             lead.Company,
             lead.JobTitle,
             lead.Source,
+            lead.Region,
+            lead.LeadType,
+            lead.ProductInterest,
+            lead.Cnpj,
+            lead.AssignedTo,
             lead.Score,
             (LeadTemperature)lead.Temperature,
             (LeadStatus)lead.Status,
-            lead.CreatedAtUtc);
+            lead.CreatedAtUtc,
+            lead.UpdatedAtUtc);
 
     public static void UpdateFromDomain(this LeadRecord record, Lead lead)
     {
@@ -42,9 +54,15 @@ internal static class LeadRecordMappings
         record.Company = lead.Company;
         record.JobTitle = lead.JobTitle;
         record.Source = lead.Source;
+        record.Region = lead.Region;
+        record.LeadType = lead.LeadType;
+        record.ProductInterest = lead.ProductInterest;
+        record.Cnpj = lead.Cnpj;
+        record.AssignedTo = lead.AssignedTo;
         record.Score = lead.Score;
         record.Temperature = (int)lead.Temperature;
         record.Status = (int)lead.Status;
         record.CreatedAtUtc = lead.CreatedAtUtc;
+        record.UpdatedAtUtc = lead.UpdatedAtUtc;
     }
 }

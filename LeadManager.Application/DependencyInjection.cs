@@ -1,5 +1,5 @@
-using LeadManager.Application.Leads;
 using LeadManager.Application.Abstractions;
+using LeadManager.Application.Leads;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadManager.Application;
@@ -12,6 +12,7 @@ public static class DependencyInjection
         services.AddScoped<CreateLeadUseCase>();
         services.AddScoped<ListLeadsUseCase>();
         services.AddScoped<GetLeadByIdUseCase>();
+        services.AddScoped<GetLeadHistoryUseCase>();
         services.AddScoped<UpdateLeadStatusUseCase>();
         services.AddScoped<RecalculateLeadScoreUseCase>();
 

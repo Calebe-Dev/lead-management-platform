@@ -6,4 +6,8 @@ public sealed record CreateLeadCommand(
     string Phone,
     string Company,
     string JobTitle,
-    string Source);
+    string Source,
+    string Region,
+    string? LeadType,
+    string? ProductInterest,
+    string? Cnpj);

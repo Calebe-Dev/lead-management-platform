@@ -8,7 +8,13 @@ public sealed record LeadResponse(
     string Company,
     string JobTitle,
     string Source,
+    string Region,
+    string LeadType,
+    string ProductInterest,
+    string Cnpj,
+    string AssignedTo,
     int Score,
     string Temperature,
     string Status,
-    DateTime CreatedAtUtc);
+    DateTime CreatedAtUtc,
+    DateTime UpdatedAtUtc);

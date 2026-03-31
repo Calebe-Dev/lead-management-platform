@@ -1,4 +1,5 @@
 using LeadManager.Application.Abstractions;
+using LeadManager.Application.Leads;
 using LeadManager.Domain.Leads;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,14 +35,115 @@ public sealed class EfLeadRepository : ILeadRepository
         return leadRecord?.ToDomain();
     }
 
-    public async Task<IReadOnlyCollection<Lead>> ListAsync(CancellationToken cancellationToken = default)
+    public async Task<DuplicateLeadMatch?> FindDuplicateAsync(string email, string phone, string cnpj, CancellationToken cancellationToken = default)
     {
-        var records = await _dbContext.Leads
+        var normalizedEmail = (email ?? string.Empty).Trim().ToLowerInvariant();
+        var normalizedPhone = NormalizeDigits(phone);
+        var normalizedCnpj = NormalizeDigits(cnpj);
+
+        var duplicate = await _dbContext.Leads
             .AsNoTracking()
+            .FirstOrDefaultAsync(lead =>
+                    lead.Email == normalizedEmail
+                    || lead.Phone == normalizedPhone
+                    || (!string.IsNullOrWhiteSpace(normalizedCnpj) && lead.Cnpj == normalizedCnpj),
+                cancellationToken);
+
+        if (duplicate is null)
+        {
+            return null;
+        }
+
+        var matchedFields = new List<string>();
+        if (duplicate.Email == normalizedEmail)
+        {
+            matchedFields.Add("email");
+        }
+
+        if (duplicate.Phone == normalizedPhone)
+        {
+            matchedFields.Add("phone");
+        }
+
+        if (!string.IsNullOrWhiteSpace(normalizedCnpj) && duplicate.Cnpj == normalizedCnpj)
+        {
+            matchedFields.Add("cnpj");
+        }
+
+        return new DuplicateLeadMatch(duplicate.ToDomain(), matchedFields);
+    }
+
+    public async Task<PagedResult<Lead>> ListAsync(ListLeadsQuery query, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        var queryable = _dbContext.Leads.AsNoTracking().AsQueryable();
+
+        if (query.Status.HasValue)
+        {
+            queryable = queryable.Where(lead => lead.Status == (int)query.Status.Value);
+        }
+
+        if (query.Temperature.HasValue)
+        {
+            queryable = queryable.Where(lead => lead.Temperature == (int)query.Temperature.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Region))
+        {
+            var region = query.Region.Trim();
+            queryable = queryable.Where(lead => lead.Region == region);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.LeadType))
+        {
+            var leadType = query.LeadType.Trim();
+            queryable = queryable.Where(lead => lead.LeadType == leadType);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.ProductInterest))
+        {
+            var productInterest = query.ProductInterest.Trim();
+            queryable = queryable.Where(lead => lead.ProductInterest == productInterest);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.AssignedTo))
+        {
+            var assignedTo = query.AssignedTo.Trim();
+            queryable = queryable.Where(lead => lead.AssignedTo == assignedTo);
+        }
+
+        if (query.MinScore.HasValue)
+        {
+            queryable = queryable.Where(lead => lead.Score >= query.MinScore.Value);
+        }
+
+        if (query.MaxScore.HasValue)
+        {
+            queryable = queryable.Where(lead => lead.Score <= query.MaxScore.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var search = query.Search.Trim().ToLowerInvariant();
+            queryable = queryable.Where(lead =>
+                lead.Name.ToLower().Contains(search)
+                || lead.Email.ToLower().Contains(search)
+                || lead.Company.ToLower().Contains(search));
+        }
+
+        var totalItems = await queryable.CountAsync(cancellationToken);
+        var records = await queryable
             .OrderByDescending(lead => lead.CreatedAtUtc)
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
             .ToListAsync(cancellationToken);
 
-        return records.Select(lead => lead.ToDomain()).ToArray();
+        return new PagedResult<Lead>(
+            records.Select(lead => lead.ToDomain()).ToArray(),
+            query.Page,
+            query.PageSize,
+            totalItems);
     }
 
     public async Task UpdateAsync(Lead lead, CancellationToken cancellationToken = default)
@@ -58,5 +160,15 @@ public sealed class EfLeadRepository : ILeadRepository
 
         existingRecord.UpdateFromDomain(lead);
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private static string NormalizeDigits(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        return new string(value.Where(char.IsDigit).ToArray());
     }
 }

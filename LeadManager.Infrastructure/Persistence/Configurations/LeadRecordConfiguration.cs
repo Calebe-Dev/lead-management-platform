@@ -33,6 +33,10 @@ internal sealed class LeadRecordConfiguration : IEntityTypeConfiguration<LeadRec
             .HasMaxLength(50)
             .IsRequired();
 
+        builder.HasIndex(lead => lead.Phone)
+            .HasDatabaseName("ix_leads_phone")
+            .IsUnique();
+
         builder.Property(lead => lead.Company)
             .HasColumnName("company")
             .HasMaxLength(200)
@@ -46,6 +50,36 @@ internal sealed class LeadRecordConfiguration : IEntityTypeConfiguration<LeadRec
         builder.Property(lead => lead.Source)
             .HasColumnName("source")
             .HasMaxLength(100)
+            .IsRequired();
+
+        builder.Property(lead => lead.Region)
+            .HasColumnName("region")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.Property(lead => lead.LeadType)
+            .HasColumnName("lead_type")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.Property(lead => lead.ProductInterest)
+            .HasColumnName("product_interest")
+            .HasMaxLength(200)
+            .IsRequired();
+
+        builder.Property(lead => lead.Cnpj)
+            .HasColumnName("cnpj")
+            .HasMaxLength(14)
+            .IsRequired();
+
+        builder.HasIndex(lead => lead.Cnpj)
+            .HasDatabaseName("ix_leads_cnpj")
+            .IsUnique()
+            .HasFilter("cnpj <> ''");
+
+        builder.Property(lead => lead.AssignedTo)
+            .HasColumnName("assigned_to")
+            .HasMaxLength(200)
             .IsRequired();
 
         builder.Property(lead => lead.Score)
@@ -62,6 +96,11 @@ internal sealed class LeadRecordConfiguration : IEntityTypeConfiguration<LeadRec
 
         builder.Property(lead => lead.CreatedAtUtc)
             .HasColumnName("created_at_utc")
+            .HasColumnType("timestamp with time zone")
+            .IsRequired();
+
+        builder.Property(lead => lead.UpdatedAtUtc)
+            .HasColumnName("updated_at_utc")
             .HasColumnType("timestamp with time zone")
             .IsRequired();
     }
