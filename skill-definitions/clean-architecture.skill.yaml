@@ -1,0 +1,7 @@
+id: clean-architecture
+name: clean-architecture-enforcer
+description: aplica separacao por camadas e regras de dependencia
+capabilities:
+  - validar-fronteiras-domain-application-infrastructure-api
+  - revisar-injecao-de-dependencia
+  - prevenir-acoplamento-indevido

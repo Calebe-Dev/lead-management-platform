@@ -1,0 +1,7 @@
+id: cicd-delivery
+name: pipeline-automation
+description: monta pipelines para build, test, quality e release
+capabilities:
+  - workflow-github-actions
+  - gates-por-fase
+  - versionamento-e-release-notes

@@ -1,0 +1,10 @@
+id: component-unit-testing
+name: unit-testing-by-component
+description: define padrao de testes unitarios por componente
+capabilities:
+  - testes-entidades-e-casos-de-uso
+  - testes-de-validacao
+  - testes-de-classificacao-e-score
+frameworks:
+  backend: xunit
+  frontend: vitest

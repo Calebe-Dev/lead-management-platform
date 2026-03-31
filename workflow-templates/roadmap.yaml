@@ -1,0 +1,65 @@
+name: lead-management-roadmap
+version: 1
+principle: "primeiro-funciona-depois-organiza-depois-escala-depois-otimiza"
+phases:
+  - id: 0
+    name: setup-fundamentos
+    outcomes:
+      - repositorio-organizado
+      - ferramentas-base-configuradas
+  - id: 1
+    name: backend-mvp
+    outcomes:
+      - api-criar-listar-leads
+  - id: 2
+    name: regras-negocio-iniciais
+    outcomes:
+      - score-classificacao-validacao
+  - id: 3
+    name: testes-unitarios
+    outcomes:
+      - testes-por-componente
+  - id: 4
+    name: clean-architecture-refactor
+    outcomes:
+      - camadas-domain-application-infrastructure-api
+  - id: 5
+    name: persistencia-real
+    outcomes:
+      - postgres-migrations-repositorios
+  - id: 6
+    name: funcionalidades-avancadas
+    outcomes:
+      - distribuicao-duplicidade-historico
+  - id: 7
+    name: frontend-vue
+    outcomes:
+      - telas-leads-integradas
+  - id: 8
+    name: testes-integracao
+    outcomes:
+      - fluxo-end-to-end-validado
+  - id: 9
+    name: dockerizacao
+    outcomes:
+      - stack-local-reproduzivel
+  - id: 10
+    name: seguranca
+    outcomes:
+      - jwt-roles-endpoints-protegidos
+  - id: 11
+    name: performance
+    outcomes:
+      - cache-redis-paginacao
+  - id: 12
+    name: qualidade-codigo
+    outcomes:
+      - cobertura-analise-refactor
+  - id: 13
+    name: cicd
+    outcomes:
+      - build-teste-docker-automatizados
+  - id: 14
+    name: kubernetes-opcional
+    outcomes:
+      - manifests-deploy-service-ingress

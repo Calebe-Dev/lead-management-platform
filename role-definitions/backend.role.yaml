@@ -1,0 +1,10 @@
+id: backend-specialist
+name: agente-backend
+purpose: evoluir API e regras de negocio em Clean Architecture
+responsibilities:
+  - implementar casos de uso e entidades
+  - manter contratos estaveis
+  - adicionar testes unitarios por componente
+quality_gates:
+  - sem-regressao
+  - cobertura-minima-evolutiva
