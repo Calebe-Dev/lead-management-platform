@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import LeadsModule from './modules/leads/ui/LeadsModule.vue'
 </script>
 
 <template>
-  <HelloWorld />
+  <LeadsModule />
 </template>
