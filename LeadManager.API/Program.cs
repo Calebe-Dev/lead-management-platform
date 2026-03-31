@@ -49,7 +49,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
+{
+    app.UseHttpsRedirection();
+}
 app.UseMiddleware<ApiExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();

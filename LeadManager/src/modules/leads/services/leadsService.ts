@@ -1,16 +1,27 @@
 import type { CreateLeadPayload, Lead, UpdateLeadStatusPayload } from '../types'
 
 const API_BASE_URL = '/api/leads'
+const AUTH_TOKEN_KEY = 'lead_manager_token'
 
 async function parseError(response: Response): Promise<string> {
   const message = await response.text()
   return message || `Request failed with status ${response.status}`
 }
 
+function getAuthHeaders(): Record<string, string> {
+  if (typeof window === 'undefined') {
+    return {}
+  }
+
+  const token = window.localStorage.getItem(AUTH_TOKEN_KEY)
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 async function request<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
   const response = await fetch(input, {
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeaders(),
       ...(init?.headers ?? {}),
     },
     ...init,

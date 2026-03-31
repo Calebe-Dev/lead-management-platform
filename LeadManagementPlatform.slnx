@@ -3,5 +3,6 @@
   <Project Path="LeadManager.Application/LeadManager.Application.csproj" />
   <Project Path="LeadManager.Domain/LeadManager.Domain.csproj" />
   <Project Path="LeadManager.Infrastructure/LeadManager.Infrastructure.csproj" />
+  <Project Path="LeadManager.Tests.Integration/LeadManager.Tests.Integration.csproj" />
   <Project Path="LeadManager.Tests.Unit/LeadManager.Tests.Unit.csproj" />
 </Solution>

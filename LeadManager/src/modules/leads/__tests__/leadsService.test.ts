@@ -1,7 +1,12 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createLead, getLeadById, listLeads, recalculateLeadScore, updateLeadStatus } from '../services/leadsService'
 
 describe('leadsService', () => {
+  afterEach(() => {
+    window.localStorage.clear()
+    vi.unstubAllGlobals()
+  })
+
   it('calls list endpoint', async () => {
     const response = [{ id: '1' }]
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
@@ -12,7 +17,11 @@ describe('leadsService', () => {
 
     const result = await listLeads()
 
-    expect(fetch).toHaveBeenCalledWith('/api/leads', expect.any(Object))
+    expect(fetch).toHaveBeenCalledWith('/api/leads', expect.objectContaining({
+      headers: expect.objectContaining({
+        'Content-Type': 'application/json',
+      }),
+    }))
     expect(result).toEqual(response)
   })
 
@@ -32,7 +41,29 @@ describe('leadsService', () => {
       source: 'Web',
     })
 
-    expect(fetch).toHaveBeenCalledWith('/api/leads', expect.objectContaining({ method: 'POST' }))
+    expect(fetch).toHaveBeenCalledWith('/api/leads', expect.objectContaining({
+      method: 'POST',
+      headers: expect.objectContaining({
+        'Content-Type': 'application/json',
+      }),
+    }))
+  })
+
+  it('adds bearer token when available', async () => {
+    window.localStorage.setItem('lead_manager_token', 'test-token')
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [{ id: '1' }],
+    }))
+
+    await listLeads()
+
+    expect(fetch).toHaveBeenCalledWith('/api/leads', expect.objectContaining({
+      headers: expect.objectContaining({
+        Authorization: 'Bearer test-token',
+      }),
+    }))
   })
 
   it('calls detail, status and score endpoints', async () => {

@@ -11,9 +11,7 @@ jobs:
   backend:
     name: Backend Build and Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: LeadManager.API
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,18 +21,26 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore
-        run: dotnet restore
+      - name: Restore backend and integration projects
+        run: |
+          dotnet restore lead-management-platform.sln
+          dotnet restore LeadManager.Tests.Integration/LeadManager.Tests.Integration.csproj
 
-      - name: Build
-        run: dotnet build --no-restore --configuration Release
+      - name: Build backend and integration projects
+        run: |
+          dotnet build lead-management-platform.sln --no-restore --configuration Release
+          dotnet build LeadManager.Tests.Integration/LeadManager.Tests.Integration.csproj --no-restore --configuration Release
 
-      - name: Test
-        run: dotnet test --configuration Release --no-build --verbosity normal || echo "No test projects found yet."
+      - name: Run unit tests
+        run: dotnet test LeadManager.Tests.Unit/LeadManager.Tests.Unit.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Run integration tests
+        run: dotnet test LeadManager.Tests.Integration/LeadManager.Tests.Integration.csproj --configuration Release --no-build --verbosity normal
 
   frontend:
-    name: Frontend Build
+    name: Frontend Test and Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: LeadManager
@@ -55,5 +61,25 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Test
+        run: pnpm test
+
       - name: Build
         run: pnpm build
+
+  containers:
+    name: Container Definitions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs:
+      - backend
+      - frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose
+        run: docker compose config
+
+      - name: Build API and frontend images
+        run: docker compose build api frontend
