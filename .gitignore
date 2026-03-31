@@ -19,3 +19,7 @@ LeadManager/.pnpm-store/
 
 # logs
 *.log
+# explicit ignored agent/reference structure folders
+agent-blueprints/
+.ai-agents/
+.references/

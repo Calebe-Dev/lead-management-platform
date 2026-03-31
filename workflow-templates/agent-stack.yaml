@@ -1,0 +1,20 @@
+agents:
+  orchestrator:
+    role: orchestrator
+    mission: coordenar entrega fase a fase com commits pequenos
+    checks:
+      - backend-build
+      - frontend-build
+      - testes-da-fase
+  documentation:
+    role: documentation-specialist
+    mission: manter readme, guias e decisoes tecnicas atualizadas
+  backend:
+    role: backend-specialist
+    mission: evoluir API com clean architecture e testes unitarios por componente
+  frontend:
+    role: frontend-specialist
+    mission: evoluir UI de leads com componentes testaveis
+  qa:
+    role: documentation-specialist
+    mission: validar cobertura, regressao e aderencia a clean code

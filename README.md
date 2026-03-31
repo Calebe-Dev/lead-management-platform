@@ -15,7 +15,7 @@ Base de desenvolvimento do **Lead Management Platform** com foco em:
 - `workflow-templates/` fluxos de desenvolvimento por fase
 - `role-definitions/` papeis de agentes
 - `skill-definitions/` habilidades reutilizaveis dos agentes
-- `agent-blueprints/` definicoes de agentes (orquestrador e especialistas)
+- `workflow-templates/agent-stack.yaml` stack de agentes (orquestrador e especialistas)
 
 ## Diretrizes adotadas
 
