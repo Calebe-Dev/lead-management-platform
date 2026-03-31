@@ -9,6 +9,10 @@ public static class DependencyInjection
     {
         services.AddScoped<CreateLeadUseCase>();
         services.AddScoped<ListLeadsUseCase>();
+        services.AddScoped<GetLeadByIdUseCase>();
+        services.AddScoped<UpdateLeadStatusUseCase>();
+        services.AddScoped<RecalculateLeadScoreUseCase>();
+
         return services;
     }
 }

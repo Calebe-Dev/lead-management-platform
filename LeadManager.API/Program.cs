@@ -29,4 +29,22 @@ app.MapGet("/api/leads", async (ListLeadsUseCase useCase, CancellationToken canc
     return Results.Ok(result);
 });
 
+app.MapGet("/api/leads/{id:guid}", async (Guid id, GetLeadByIdUseCase useCase, CancellationToken cancellationToken) =>
+{
+    var result = await useCase.ExecuteAsync(id, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
+});
+
+app.MapPatch("/api/leads/{id:guid}/status", async (Guid id, UpdateLeadStatusCommand command, UpdateLeadStatusUseCase useCase, CancellationToken cancellationToken) =>
+{
+    var result = await useCase.ExecuteAsync(id, command, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
+});
+
+app.MapPost("/api/leads/{id:guid}/score", async (Guid id, RecalculateLeadScoreUseCase useCase, CancellationToken cancellationToken) =>
+{
+    var result = await useCase.ExecuteAsync(id, cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
+});
+
 app.Run();
