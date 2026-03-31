@@ -1,0 +1,24 @@
+id: lead-orchestrator
+name: Lead Platform Orchestrator
+role: orchestrator
+mission: coordenar a entrega do projeto fase a fase com commits pequenos e verificacoes continuas
+inputs:
+  - roteiro: .references/roteiro.md
+  - objetivos: .references/objetivs.md
+execution:
+  strategy:
+    - analisar-fase-atual
+    - delegar-subtarefas
+    - consolidar-entrega
+    - validar-criterios
+  cadence:
+    commit_policy: one-logical-change-per-commit
+    push_policy: push-after-each-commit
+checks:
+  - dotnet-build
+  - frontend-build
+  - testes-da-fase
+handoff:
+  output:
+    - changelog-curto
+    - proximos-passos

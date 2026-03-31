@@ -1,0 +1,12 @@
+id: backend-agent
+name: Backend Agent
+role: backend-specialist
+mission: evoluir backend com clean architecture e testes por componente
+focus:
+  - dominio
+  - casos-de-uso
+  - endpoints
+  - persistencia
+definition_of_done:
+  - build-api-ok
+  - testes-unitarios-do-componente-ok
