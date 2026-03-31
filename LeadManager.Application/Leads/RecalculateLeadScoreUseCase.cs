@@ -5,10 +5,12 @@ namespace LeadManager.Application.Leads;
 public sealed class RecalculateLeadScoreUseCase
 {
     private readonly ILeadRepository _leadRepository;
+    private readonly ILeadListCache _leadListCache;
 
-    public RecalculateLeadScoreUseCase(ILeadRepository leadRepository)
+    public RecalculateLeadScoreUseCase(ILeadRepository leadRepository, ILeadListCache leadListCache)
     {
         _leadRepository = leadRepository;
+        _leadListCache = leadListCache;
     }
 
     public async Task<LeadResponse?> ExecuteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -26,6 +28,7 @@ public sealed class RecalculateLeadScoreUseCase
 
         lead.RecalculateScore();
         await _leadRepository.UpdateAsync(lead, cancellationToken);
+        await _leadListCache.InvalidateAsync(cancellationToken);
 
         return lead.ToResponse();
     }

@@ -5,10 +5,12 @@ namespace LeadManager.Application.Leads;
 public sealed class UpdateLeadStatusUseCase
 {
     private readonly ILeadRepository _leadRepository;
+    private readonly ILeadListCache _leadListCache;
 
-    public UpdateLeadStatusUseCase(ILeadRepository leadRepository)
+    public UpdateLeadStatusUseCase(ILeadRepository leadRepository, ILeadListCache leadListCache)
     {
         _leadRepository = leadRepository;
+        _leadListCache = leadListCache;
     }
 
     public async Task<LeadResponse?> ExecuteAsync(Guid id, UpdateLeadStatusCommand command, CancellationToken cancellationToken = default)
@@ -28,6 +30,7 @@ public sealed class UpdateLeadStatusUseCase
 
         lead.ChangeStatus(command.Status);
         await _leadRepository.UpdateAsync(lead, cancellationToken);
+        await _leadListCache.InvalidateAsync(cancellationToken);
 
         return lead.ToResponse();
     }
