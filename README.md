@@ -35,7 +35,3 @@ Base de desenvolvimento do **Lead Management Platform** com foco em:
 7. Frontend funcional
 8. Integracao e seguranca
 9. Infra e CI/CD
-
-## Observacao importante
-
-As pastas de referencia e runtime de agentes de IA permanecem fora de versionamento via `.gitignore`.
