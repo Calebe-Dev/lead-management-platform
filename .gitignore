@@ -1,0 +1,21 @@
+# macOS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# references and AI runtime/state folders (must stay local)
+.references/
+.ai-runtime/
+.agents/
+
+# frontend
+LeadManager/node_modules/
+LeadManager/dist/
+LeadManager/.pnpm-store/
+
+# backend
+**/bin/
+**/obj/
+
+# logs
+*.log
