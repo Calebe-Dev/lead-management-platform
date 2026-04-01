@@ -1,6 +1,55 @@
-@LeadManager.API_HostAddress = http://localhost:5039
+@Host = http://localhost:5039
+@AccessToken = REPLACE_ME
+@RefreshToken = REPLACE_ME
 
-GET {{LeadManager.API_HostAddress}}/weatherforecast/
-Accept: application/json
+### Auth - token
+POST {{Host}}/api/auth/token
+Content-Type: application/json
 
-###
+{
+  "username": "admin",
+  "password": "admin123!"
+}
+
+### Auth - refresh
+POST {{Host}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{RefreshToken}}"
+}
+
+### List leads (paged)
+GET {{Host}}/api/leads?page=1&pageSize=10
+Authorization: Bearer {{AccessToken}}
+
+### Create lead
+POST {{Host}}/api/leads
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "jane.doe@example.com",
+  "phone": "+55-11-99999-0000",
+  "company": "Acme",
+  "jobTitle": "CEO",
+  "source": "referral",
+  "region": "South",
+  "leadType": "Enterprise",
+  "productInterest": "CRM",
+  "cnpj": "12.345.678/0001-90",
+  "campaignId": null
+}
+
+### Dashboard
+GET {{Host}}/api/dashboard/overview
+Authorization: Bearer {{AccessToken}}
+
+### Campaigns
+GET {{Host}}/api/campaigns
+Authorization: Bearer {{AccessToken}}
+
+### Users
+GET {{Host}}/api/users
+Authorization: Bearer {{AccessToken}}

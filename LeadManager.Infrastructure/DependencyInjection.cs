@@ -40,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<ILeadRepository, EfLeadRepository>();
         services.AddScoped<ILeadHistoryRepository, EfLeadHistoryRepository>();
         services.AddScoped<IRoundRobinStateRepository, EfRoundRobinStateRepository>();
+        services.AddScoped<IAssignmentRepository, EfAssignmentRepository>();
         services.AddScoped<ILeadAssignmentService, RuleBasedLeadAssignmentService>();
         services.AddScoped<ILeadListCache, RedisLeadListCache>();
         services.AddScoped<ICampaignRepository, EfCampaignRepository>();

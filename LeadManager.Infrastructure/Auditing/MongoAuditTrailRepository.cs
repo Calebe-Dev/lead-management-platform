@@ -35,15 +35,22 @@ public sealed class MongoAuditTrailRepository : IAuditTrailRepository
             return;
         }
 
-        await _interactionCollection.InsertOneAsync(
-            new InteractionDocument
-            {
-                LeadId = record.LeadId,
-                EventType = record.EventType,
-                PayloadJson = record.PayloadJson,
-                OccurredAtUtc = record.OccurredAtUtc
-            },
-            cancellationToken: cancellationToken);
+        try
+        {
+            await _interactionCollection.InsertOneAsync(
+                new InteractionDocument
+                {
+                    LeadId = record.LeadId,
+                    EventType = record.EventType,
+                    PayloadJson = record.PayloadJson,
+                    OccurredAtUtc = record.OccurredAtUtc
+                },
+                cancellationToken: cancellationToken);
+        }
+        catch
+        {
+            // best-effort audit trail in local/offline environments
+        }
     }
 
     public async Task WriteBehaviorEventAsync(BehaviorEventRecord record, CancellationToken cancellationToken = default)
@@ -53,16 +60,23 @@ public sealed class MongoAuditTrailRepository : IAuditTrailRepository
             return;
         }
 
-        await _behaviorCollection.InsertOneAsync(
-            new BehaviorDocument
-            {
-                LeadId = record.LeadId,
-                EventName = record.EventName,
-                ScoreImpact = record.ScoreImpact,
-                PayloadJson = record.PayloadJson,
-                OccurredAtUtc = record.OccurredAtUtc
-            },
-            cancellationToken: cancellationToken);
+        try
+        {
+            await _behaviorCollection.InsertOneAsync(
+                new BehaviorDocument
+                {
+                    LeadId = record.LeadId,
+                    EventName = record.EventName,
+                    ScoreImpact = record.ScoreImpact,
+                    PayloadJson = record.PayloadJson,
+                    OccurredAtUtc = record.OccurredAtUtc
+                },
+                cancellationToken: cancellationToken);
+        }
+        catch
+        {
+            // best-effort audit trail in local/offline environments
+        }
     }
 
     public async Task WriteAiDecisionAsync(AiDecisionRecord record, CancellationToken cancellationToken = default)
@@ -72,16 +86,23 @@ public sealed class MongoAuditTrailRepository : IAuditTrailRepository
             return;
         }
 
-        await _aiDecisionCollection.InsertOneAsync(
-            new AiDecisionDocument
-            {
-                LeadId = record.LeadId,
-                Provider = record.Provider,
-                PromptFingerprint = record.PromptFingerprint,
-                PayloadJson = record.PayloadJson,
-                OccurredAtUtc = record.OccurredAtUtc
-            },
-            cancellationToken: cancellationToken);
+        try
+        {
+            await _aiDecisionCollection.InsertOneAsync(
+                new AiDecisionDocument
+                {
+                    LeadId = record.LeadId,
+                    Provider = record.Provider,
+                    PromptFingerprint = record.PromptFingerprint,
+                    PayloadJson = record.PayloadJson,
+                    OccurredAtUtc = record.OccurredAtUtc
+                },
+                cancellationToken: cancellationToken);
+        }
+        catch
+        {
+            // best-effort audit trail in local/offline environments
+        }
     }
 }
 

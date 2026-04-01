@@ -24,13 +24,13 @@ spec:
                 name: lead-manager-secrets
           livenessProbe:
             httpGet:
-              path: /api/leads
+              path: /health
               port: 8080
             initialDelaySeconds: 25
             periodSeconds: 15
           readinessProbe:
             httpGet:
-              path: /api/leads
+              path: /health
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10

@@ -1,5 +1,4 @@
 using LeadManager.Application.Abstractions;
-using LeadManager.Application.Auth;
 using LeadManager.Application.Leads;
 using LeadManager.Domain.Leads;
 
@@ -68,7 +67,7 @@ public sealed class LeadApplicationUseCaseTests
             "CRM",
             ""));
 
-        var useCase = new CreateLeadUseCase(repository, history, assignment, cache, new FakeLeadScoringService(), new FakeOutboxRepository(), new FakeAuditTrailRepository());
+        var useCase = new CreateLeadUseCase(repository, history, assignment, cache, new FakeLeadScoringService(), new FakeOutboxRepository(), new FakeAuditTrailRepository(), new FakeAssignmentRepository());
 
         var ex = await Assert.ThrowsAsync<DuplicateLeadException>(() => useCase.ExecuteAsync(new CreateLeadCommand(
             "New Lead",
@@ -93,7 +92,7 @@ public sealed class LeadApplicationUseCaseTests
         var history = new FakeLeadHistoryRepository();
         var assignment = new FakeLeadAssignmentService("ana.silva");
         var cache = new FakeLeadListCache();
-        var useCase = new CreateLeadUseCase(repository, history, assignment, cache, new FakeLeadScoringService(), new FakeOutboxRepository(), new FakeAuditTrailRepository());
+        var useCase = new CreateLeadUseCase(repository, history, assignment, cache, new FakeLeadScoringService(), new FakeOutboxRepository(), new FakeAuditTrailRepository(), new FakeAssignmentRepository());
 
         var response = await useCase.ExecuteAsync(new CreateLeadCommand(
             "Jane Doe",
@@ -350,5 +349,11 @@ internal sealed class FakeAuditTrailRepository : IAuditTrailRepository
         Task.CompletedTask;
 
     public Task WriteAiDecisionAsync(AiDecisionRecord record, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+}
+
+internal sealed class FakeAssignmentRepository : IAssignmentRepository
+{
+    public Task AddAsync(Guid leadId, string assignee, string reason, DateTime assignedAtUtc, CancellationToken cancellationToken = default) =>
         Task.CompletedTask;
 }

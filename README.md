@@ -1,72 +1,76 @@
 # Lead Management Platform
 
-Plataforma full-stack para gestão de leads, com backend em .NET (Clean Architecture), frontend em Vue 3 + TypeScript, persistência em PostgreSQL e cache em Redis.
+Plataforma full-stack para qualificação, scoring, distribuição, auditoria e sincronização de leads.
 
-## Arquitetura implementada
+## Stack
 
-- **Backend API**: `LeadManager.API` (Minimal APIs, JWT bearer auth, middleware de tratamento de erro)
-- **Camada de aplicação**: `LeadManager.Application` (use cases e contratos)
-- **Domínio**: `LeadManager.Domain` (entidades, enums e regras)
-- **Infraestrutura**: `LeadManager.Infrastructure` (EF Core + Npgsql, Redis cache, distribuição round-robin)
-- **Frontend**: `LeadManager` (Vue + Vite + Vitest)
-- **Testes**:
-  - `LeadManager.Tests.Unit`
-  - `LeadManager.Tests.Integration`
+- Backend: `.NET 10` com arquitetura em camadas (`API`, `Application`, `Domain`, `Infrastructure`)
+- Frontend: `Vue 3 + TypeScript + Vite`
+- Persistência operacional: `PostgreSQL`
+- Cache distribuído: `Redis`
+- Auditoria e logs de IA/comportamento: `MongoDB`
+- Processamento assíncrono: `Outbox Worker`
 
-## Funcionalidades principais
+## Entregas principais deste ciclo
 
-- Emissão de token JWT por usuário/role
-- CRUD parcial de leads (criação, listagem, detalhe)
-- Atualização de status com autorização por role
-- Recalcular score do lead
-- Histórico por lead
-- Filtros e paginação na listagem
-- Cache distribuído de listagens via Redis
+- Contrato frontend/backend corrigido (`GET /api/leads` paginado).
+- Payload de criação de lead estendido com `region`, `leadType`, `productInterest`, `cnpj`, `campaignId`.
+- Parsing padronizado de erros `ProblemDetails` no frontend.
+- Auth avançada:
+  - `POST /api/auth/token`
+  - `POST /api/auth/refresh`
+  - `POST /api/auth/logout`
+- Gestão de usuários com RBAC (`/api/users`).
+- CRUD de campanhas (`/api/campaigns`).
+- Merge de leads (`POST /api/leads/{id}/merge`).
+- Histórico paginado (`GET /api/leads/{id}/history?page=&pageSize=`).
+- Dashboard operacional (`GET /api/dashboard/overview`).
+- Integrações:
+  - Sync CRM (`POST /api/integrations/crm/sync/{leadId}`)
+  - Webhooks HubSpot/Salesforce/WhatsApp
+- Outbox com retry/backoff e worker dedicado.
+- Infra de execução com `docker-compose` completo (`api`, `worker`, `frontend`, `postgres`, `redis`, `mongo`).
+- Manifestos Kubernetes completos em `k8s/` com `kustomization`.
 
-## Segurança
+## Estrutura
 
-- Autenticação: `Bearer JWT`
-- Autorização por role:
-  - `admin`, `marketing`, `vendas` em `/api/leads` (acesso geral)
-  - `admin` e `vendas` para atualizar status e recalcular score
-- Validação estrita de configuração JWT (issuer/audience/key/expiração)
-- Middleware de erros com respostas HTTP explícitas (400/409)
+- `LeadManager.API`: endpoints e middleware HTTP.
+- `LeadManager.Application`: use cases e contratos.
+- `LeadManager.Domain`: regras de negócio e entidade `Lead`.
+- `LeadManager.Infrastructure`: EF Core, Redis, Mongo, scoring IA, integrações e outbox.
+- `LeadManager.Worker`: processamento assíncrono de mensagens de outbox.
+- `LeadManager`: frontend Vue.
 
-## Endpoints da API
+## Pré-requisitos locais
 
-Base: `/api`
+- .NET SDK 10.x
+- Node.js 22.x
+- pnpm 10.x
+- Docker + Docker Compose
+- Kubernetes CLI (`kubectl`) opcional para validar manifestos
 
-- `POST /auth/token` – gera token JWT
-- `POST /leads` – cria lead
-- `GET /leads` – lista leads (com filtros e paginação)
-- `GET /leads/{id}` – detalhe de lead
-- `GET /leads/{id}/history` – histórico do lead
-- `PATCH /leads/{id}/status` – altera status (admin/vendas)
-- `POST /leads/{id}/score` – recalcula score (admin/vendas)
+## Bootstrap manual local
 
-### Filtros de `GET /api/leads`
+1. Suba dependências:
 
-`status`, `temperature`, `region`, `leadType`, `productInterest`, `assignedTo`, `search`, `minScore`, `maxScore`, `page`, `pageSize`.
+```bash
+docker compose up -d postgres redis mongo
+```
 
-## Como rodar localmente (sem Docker)
-
-### Pré-requisitos
-
-- .NET SDK 10
-- Node 22 + pnpm 10
-- PostgreSQL
-- Redis
-
-### 1) Backend
+2. Backend API:
 
 ```bash
 dotnet restore lead-management-platform.sln
 dotnet run --project LeadManager.API
 ```
 
-API local: `http://localhost:5039`
+3. Worker:
 
-### 2) Frontend
+```bash
+dotnet run --project LeadManager.Worker
+```
+
+4. Frontend:
 
 ```bash
 cd LeadManager
@@ -74,63 +78,18 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Frontend local: `http://localhost:5173`
-
-> O Vite está configurado com proxy `/api -> http://localhost:5039`.
-
-### 3) Token para chamadas autenticadas
-
-Exemplo para obter token:
-
-```bash
-curl -s http://localhost:5039/api/auth/token \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123!"}'
-```
-
-Para usar no frontend atual, salve o token no navegador:
-
-```js
-localStorage.setItem('lead_manager_token', '<JWT_AQUI>')
-```
-
-## Como rodar com Docker Compose
-
-### Serviços
-
-- `postgres` (5432)
-- `redis` (6379)
-- `api` (8080)
-- `frontend` (5173)
-
-### Subir stack
+## Rodando stack completa em containers
 
 ```bash
 docker compose up --build
 ```
 
-Acessos:
+Acessos padrão:
 
 - Frontend: `http://localhost:5173`
 - API: `http://localhost:8080`
 
-O frontend em container faz proxy de `/api` para o serviço `api` interno (`http://api:8080`).
-
-## CI/CD (GitHub Actions)
-
-Workflow principal: `.github/workflows/ci.yml`
-
-Inclui:
-
-- restore/build backend e projeto de integração
-- testes unitários (`LeadManager.Tests.Unit`)
-- testes de integração (`LeadManager.Tests.Integration`)
-- testes + build frontend (`pnpm test`, `pnpm build`)
-- quality gate de containers (`docker compose config` + build de imagens `api` e `frontend`)
-
-Workflow auxiliar: `.github/workflows/phase-gates.yml` (validação manual por fase).
-
-## Testes e validação
+## Testes
 
 Backend:
 
@@ -146,4 +105,27 @@ Frontend:
 cd LeadManager
 pnpm test
 pnpm build
+```
+
+## CI/CD
+
+Workflow principal em `.github/workflows/ci.yml` com gates:
+
+- build/test backend
+- test/build frontend
+- validação e build de containers (`api`, `worker`, `frontend`)
+- render de manifestos Kubernetes via `kubectl kustomize k8s`
+
+## Kubernetes
+
+Manifestos em `k8s/` com:
+
+- `postgres`, `redis`, `mongo`
+- `lead-manager-api`, `lead-manager-worker`, `lead-manager-frontend`
+- `ingress`, `HPA`, `configmap` e `secret` de exemplo
+
+Render local:
+
+```bash
+kubectl kustomize k8s
 ```

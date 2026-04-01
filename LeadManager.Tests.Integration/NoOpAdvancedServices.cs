@@ -35,3 +35,9 @@ internal sealed class NoOpLeadScoringService : ILeadScoringService
     public Task<int?> ScoreAsync(Lead lead, CancellationToken cancellationToken = default) =>
         Task.FromResult<int?>(null);
 }
+
+internal sealed class NoOpAssignmentRepository : IAssignmentRepository
+{
+    public Task AddAsync(Guid leadId, string assignee, string reason, DateTime assignedAtUtc, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+}

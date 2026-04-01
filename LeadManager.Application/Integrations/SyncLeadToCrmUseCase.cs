@@ -40,7 +40,7 @@ public sealed class SyncLeadToCrmUseCase
             $$"""
             {"leadId":"{{leadId}}","providers":["hubspot","salesforce"]}
             """,
-            $"crm-sync:{leadId}:{DateTime.UtcNow:yyyyMMddHHmmss}",
+            $"crm-sync:{leadId}:{DateTime.UtcNow:yyyyMMddHHmmssffff}",
             cancellationToken);
 
         return response;

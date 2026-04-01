@@ -12,6 +12,7 @@ public sealed class CreateLeadUseCase
     private readonly ILeadScoringService _leadScoringService;
     private readonly IOutboxRepository _outboxRepository;
     private readonly IAuditTrailRepository _auditTrailRepository;
+    private readonly IAssignmentRepository _assignmentRepository;
 
     public CreateLeadUseCase(
         ILeadRepository leadRepository,
@@ -20,7 +21,8 @@ public sealed class CreateLeadUseCase
         ILeadListCache leadListCache,
         ILeadScoringService leadScoringService,
         IOutboxRepository outboxRepository,
-        IAuditTrailRepository auditTrailRepository)
+        IAuditTrailRepository auditTrailRepository,
+        IAssignmentRepository assignmentRepository)
     {
         _leadRepository = leadRepository;
         _leadHistoryRepository = leadHistoryRepository;
@@ -29,6 +31,7 @@ public sealed class CreateLeadUseCase
         _leadScoringService = leadScoringService;
         _outboxRepository = outboxRepository;
         _auditTrailRepository = auditTrailRepository;
+        _assignmentRepository = assignmentRepository;
     }
 
     public async Task<LeadResponse> ExecuteAsync(CreateLeadCommand command, CancellationToken cancellationToken = default)
@@ -69,6 +72,7 @@ public sealed class CreateLeadUseCase
         if (!string.IsNullOrWhiteSpace(assignee))
         {
             lead.AssignTo(assignee);
+            await _assignmentRepository.AddAsync(lead.Id, assignee, "distribution_rule", DateTime.UtcNow, cancellationToken);
         }
 
         await _leadRepository.AddAsync(lead, cancellationToken);
@@ -84,6 +88,11 @@ public sealed class CreateLeadUseCase
         if (!string.IsNullOrWhiteSpace(lead.AssignedTo))
         {
             historyEntries.Add(LeadHistoryEntry.Create(lead.Id, "AssignmentChanged", "assigned_to", string.Empty, lead.AssignedTo));
+        }
+
+        if (lead.CampaignId.HasValue)
+        {
+            historyEntries.Add(LeadHistoryEntry.Create(lead.Id, "DataChanged", "campaign_id", string.Empty, lead.CampaignId.Value.ToString()));
         }
 
         await _leadHistoryRepository.AddRangeAsync(historyEntries, cancellationToken);

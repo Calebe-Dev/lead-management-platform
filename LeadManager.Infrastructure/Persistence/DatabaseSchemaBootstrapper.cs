@@ -37,6 +37,16 @@ public static class DatabaseSchemaBootstrapper
             );
             """,
             """
+            CREATE TABLE IF NOT EXISTS assignments (
+              id uuid PRIMARY KEY,
+              lead_id uuid NOT NULL,
+              assignee varchar(200) NOT NULL,
+              reason varchar(100) NOT NULL,
+              assigned_at_utc timestamp with time zone NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS ix_assignments_lead_id ON assignments(lead_id);
+            """,
+            """
             CREATE TABLE IF NOT EXISTS refresh_tokens (
               id uuid PRIMARY KEY,
               token varchar(200) NOT NULL UNIQUE,

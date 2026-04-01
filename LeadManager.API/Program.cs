@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using LeadManager.Application;
@@ -12,7 +11,6 @@ using LeadManager.Infrastructure;
 using LeadManager.Infrastructure.Auth;
 using LeadManager.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -66,6 +64,8 @@ if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"
 app.UseMiddleware<ApiExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 app.MapPost("/api/auth/token", async (TokenRequest request, AuthUseCase useCase, CancellationToken cancellationToken) =>
 {
@@ -246,6 +246,11 @@ app.MapPost("/api/integrations/webhooks/salesforce", async (JsonElement payload,
     return Results.Accepted();
 });
 app.MapPost("/api/integrations/webhooks/whatsapp", async (JsonElement payload, RecordWebhookEventUseCase useCase, CancellationToken cancellationToken) =>
+{
+    await useCase.ExecuteAsync("whatsapp", payload, cancellationToken);
+    return Results.Accepted();
+});
+app.MapPost("/api/integrations/whatsapp/status", async (JsonElement payload, RecordWebhookEventUseCase useCase, CancellationToken cancellationToken) =>
 {
     await useCase.ExecuteAsync("whatsapp", payload, cancellationToken);
     return Results.Accepted();

@@ -51,6 +51,7 @@ public sealed class ApiTestWebApplicationFactory : WebApplicationFactory<Program
             services.RemoveAll(typeof(IOutboxRepository));
             services.RemoveAll(typeof(IAuditTrailRepository));
             services.RemoveAll(typeof(ILeadScoringService));
+            services.RemoveAll(typeof(IAssignmentRepository));
             services.AddSingleton<ILeadRepository, InMemoryLeadRepository>();
             services.AddSingleton<ILeadHistoryRepository, InMemoryLeadHistoryRepository>();
             services.AddSingleton<IRoundRobinStateRepository, InMemoryRoundRobinStateRepository>();
@@ -62,6 +63,7 @@ public sealed class ApiTestWebApplicationFactory : WebApplicationFactory<Program
             services.AddSingleton<IOutboxRepository, NoOpOutboxRepository>();
             services.AddSingleton<IAuditTrailRepository, NoOpAuditTrailRepository>();
             services.AddSingleton<ILeadScoringService, NoOpLeadScoringService>();
+            services.AddSingleton<IAssignmentRepository, NoOpAssignmentRepository>();
 
             services.RemoveAll(typeof(IDistributedCache));
             services.AddDistributedMemoryCache();

@@ -13,6 +13,7 @@ public sealed class LeadManagerDbContext : DbContext
     internal DbSet<RoundRobinStateRecord> RoundRobinStates => Set<RoundRobinStateRecord>();
     internal DbSet<CampaignRecord> Campaigns => Set<CampaignRecord>();
     internal DbSet<UserRecord> Users => Set<UserRecord>();
+    internal DbSet<AssignmentRecord> Assignments => Set<AssignmentRecord>();
     internal DbSet<RefreshTokenRecord> RefreshTokens => Set<RefreshTokenRecord>();
     internal DbSet<OutboxMessageRecord> OutboxMessages => Set<OutboxMessageRecord>();
 
