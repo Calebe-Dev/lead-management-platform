@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lead-manager-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lead-manager-frontend
+  template:
+    metadata:
+      labels:
+        app: lead-manager-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/replace/lead-manager-frontend:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lead-manager-frontend
+spec:
+  selector:
+    app: lead-manager-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
