@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lead-manager-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lead-manager-api
+  template:
+    metadata:
+      labels:
+        app: lead-manager-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/replace/lead-manager-api:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: lead-manager-config
+            - secretRef:
+                name: lead-manager-secrets
+          livenessProbe:
+            httpGet:
+              path: /api/leads
+              port: 8080
+            initialDelaySeconds: 25
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/leads
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lead-manager-api
+spec:
+  selector:
+    app: lead-manager-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lead-manager-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lead-manager-worker
+  template:
+    metadata:
+      labels:
+        app: lead-manager-worker
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/replace/lead-manager-worker:latest
+          envFrom:
+            - configMapRef:
+                name: lead-manager-config
+            - secretRef:
+                name: lead-manager-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 384Mi
