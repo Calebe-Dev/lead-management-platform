@@ -11,7 +11,7 @@ internal sealed class InMemoryUserRepository : IUserRepository, IUserPasswordRep
 
     public Task<UserResponse?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        var normalized = username?.Trim() ?? string.Empty;
+        var normalized = username?.Trim().ToLowerInvariant() ?? string.Empty;
         lock (_sync)
         {
             var user = _users.FirstOrDefault(x => x.Username.Equals(normalized, StringComparison.Ordinal));
@@ -42,7 +42,7 @@ internal sealed class InMemoryUserRepository : IUserRepository, IUserPasswordRep
         var now = DateTime.UtcNow;
         var user = new InMemoryUser(
             Guid.NewGuid(),
-            command.Username.Trim(),
+            command.Username.Trim().ToLowerInvariant(),
             passwordHash,
             command.Role.Trim().ToLowerInvariant(),
             now,
@@ -66,7 +66,7 @@ internal sealed class InMemoryUserRepository : IUserRepository, IUserPasswordRep
 
     public Task<string?> GetPasswordHashByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        var normalized = username?.Trim() ?? string.Empty;
+        var normalized = username?.Trim().ToLowerInvariant() ?? string.Empty;
         lock (_sync)
         {
             var passwordHash = _users.FirstOrDefault(x => x.Username.Equals(normalized, StringComparison.Ordinal))?.PasswordHash;
