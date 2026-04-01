@@ -15,7 +15,7 @@ public sealed class EfUserRepository : IUserRepository, IUserPasswordRepository
 
     public async Task<UserResponse?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        var normalized = (username ?? string.Empty).Trim();
+        var normalized = (username ?? string.Empty).Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(normalized))
         {
             return null;
@@ -23,7 +23,7 @@ public sealed class EfUserRepository : IUserRepository, IUserPasswordRepository
 
         var user = await _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Username == normalized, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Username.ToLower() == normalized, cancellationToken);
         return user?.ToResponse();
     }
 
@@ -50,7 +50,7 @@ public sealed class EfUserRepository : IUserRepository, IUserPasswordRepository
         var record = new UserRecord
         {
             Id = Guid.NewGuid(),
-            Username = command.Username.Trim(),
+            Username = command.Username.Trim().ToLowerInvariant(),
             PasswordHash = passwordHash,
             Role = command.Role.Trim().ToLowerInvariant(),
             CreatedAtUtc = now,
@@ -77,7 +77,7 @@ public sealed class EfUserRepository : IUserRepository, IUserPasswordRepository
 
     public async Task<string?> GetPasswordHashByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        var normalized = (username ?? string.Empty).Trim();
+        var normalized = (username ?? string.Empty).Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(normalized))
         {
             return null;
@@ -85,7 +85,7 @@ public sealed class EfUserRepository : IUserRepository, IUserPasswordRepository
 
         var user = await _dbContext.Users
             .AsNoTracking()
-            .Where(x => x.Username == normalized)
+            .Where(x => x.Username.ToLower() == normalized)
             .Select(x => new { x.PasswordHash })
             .FirstOrDefaultAsync(cancellationToken);
         return user?.PasswordHash;
