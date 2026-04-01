@@ -106,7 +106,7 @@ public sealed class MongoAuditTrailRepository : IAuditTrailRepository
     }
 }
 
-file sealed class InteractionDocument
+internal sealed class InteractionDocument
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -125,7 +125,7 @@ file sealed class InteractionDocument
     public DateTime OccurredAtUtc { get; set; }
 }
 
-file sealed class BehaviorDocument
+internal sealed class BehaviorDocument
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -147,7 +147,7 @@ file sealed class BehaviorDocument
     public DateTime OccurredAtUtc { get; set; }
 }
 
-file sealed class AiDecisionDocument
+internal sealed class AiDecisionDocument
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]

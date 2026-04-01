@@ -56,7 +56,11 @@ public sealed class BcryptPasswordHasher : IPasswordHasher
 
     private static byte[] ComputeHash(string value, byte[] salt)
     {
-        using var pbkdf2 = new Rfc2898DeriveBytes(Encoding.UTF8.GetBytes(value), salt, 100_000, HashAlgorithmName.SHA256);
-        return pbkdf2.GetBytes(32);
+        return Rfc2898DeriveBytes.Pbkdf2(
+            Encoding.UTF8.GetBytes(value),
+            salt,
+            100_000,
+            HashAlgorithmName.SHA256,
+            32);
     }
 }

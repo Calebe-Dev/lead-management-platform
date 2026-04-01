@@ -28,11 +28,11 @@ public static class DependencyInjection
         services.Configure<JwtTokenOptions>(configuration.GetSection("Jwt"));
         services.Configure<LeadScoringOptions>(configuration.GetSection("LeadScoring"));
         services.Configure<IntegrationOptions>(configuration.GetSection("Integrations"));
-        services.Configure<MongoAuditOptions>(new MongoAuditOptions
+        services.Configure<MongoAuditOptions>(options =>
         {
-            Enabled = !string.IsNullOrWhiteSpace(configuration.GetConnectionString("Mongo")),
-            ConnectionString = configuration.GetConnectionString("Mongo") ?? string.Empty,
-            Database = configuration["Mongo:Database"] ?? "lead_manager_audit"
+            options.Enabled = !string.IsNullOrWhiteSpace(configuration.GetConnectionString("Mongo"));
+            options.ConnectionString = configuration.GetConnectionString("Mongo") ?? string.Empty;
+            options.Database = configuration["Mongo:Database"] ?? "lead_manager_audit";
         });
         AddCaching(services, configuration);
         services.AddHttpClient();
