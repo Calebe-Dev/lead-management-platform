@@ -1,4 +1,5 @@
 using LeadManager.Application.Abstractions;
+using LeadManager.Application.Leads;
 using LeadManager.Domain.Leads;
 
 namespace LeadManager.Infrastructure.Persistence;
@@ -18,15 +19,25 @@ public sealed class InMemoryLeadHistoryRepository : ILeadHistoryRepository
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyCollection<LeadHistoryEntry>> ListByLeadIdAsync(Guid leadId, CancellationToken cancellationToken = default)
+    public Task<PagedResult<LeadHistoryEntry>> ListByLeadIdAsync(
+        Guid leadId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
     {
         lock (Sync)
         {
-            IReadOnlyCollection<LeadHistoryEntry> items = Entries
+            var items = Entries
                 .Where(entry => entry.LeadId == leadId)
                 .OrderByDescending(entry => entry.ChangedAtUtc)
                 .ToArray();
-            return Task.FromResult(items);
+            var total = items.Length;
+            var pageItems = items
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToArray();
+
+            return Task.FromResult(new PagedResult<LeadHistoryEntry>(pageItems, page, pageSize, total));
         }
     }
 }

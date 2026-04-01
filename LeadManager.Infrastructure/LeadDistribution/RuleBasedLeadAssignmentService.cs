@@ -29,7 +29,7 @@ public sealed class RuleBasedLeadAssignmentService : ILeadAssignmentService
             }
 
             var index = await _roundRobinStateRepository.GetNextIndexAsync(
-                $"{rule.Name}:{lead.Region}:{lead.Score}",
+                $"{rule.Name}:{lead.Region}:{lead.LeadType}:{lead.ProductInterest}",
                 rule.Assignees.Count,
                 cancellationToken);
 

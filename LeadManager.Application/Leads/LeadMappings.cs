@@ -18,6 +18,7 @@ internal static class LeadMappings
             lead.ProductInterest,
             lead.Cnpj,
             lead.AssignedTo,
+            lead.CampaignId,
             lead.Score,
             lead.Temperature.ToString(),
             lead.Status.ToString(),

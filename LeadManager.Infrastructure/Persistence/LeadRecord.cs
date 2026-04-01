@@ -14,6 +14,7 @@ internal sealed class LeadRecord
     public string ProductInterest { get; set; } = string.Empty;
     public string Cnpj { get; set; } = string.Empty;
     public string AssignedTo { get; set; } = string.Empty;
+    public Guid? CampaignId { get; set; }
     public int Score { get; set; }
     public int Temperature { get; set; }
     public int Status { get; set; }

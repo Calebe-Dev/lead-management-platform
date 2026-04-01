@@ -45,10 +45,23 @@ public sealed class ApiTestWebApplicationFactory : WebApplicationFactory<Program
             services.RemoveAll(typeof(ILeadHistoryRepository));
             services.RemoveAll(typeof(IRoundRobinStateRepository));
             services.RemoveAll(typeof(ILeadListCache));
+            services.RemoveAll(typeof(IUserRepository));
+            services.RemoveAll(typeof(IUserPasswordRepository));
+            services.RemoveAll(typeof(IRefreshTokenRepository));
+            services.RemoveAll(typeof(IOutboxRepository));
+            services.RemoveAll(typeof(IAuditTrailRepository));
+            services.RemoveAll(typeof(ILeadScoringService));
             services.AddSingleton<ILeadRepository, InMemoryLeadRepository>();
             services.AddSingleton<ILeadHistoryRepository, InMemoryLeadHistoryRepository>();
             services.AddSingleton<IRoundRobinStateRepository, InMemoryRoundRobinStateRepository>();
             services.AddSingleton<ILeadListCache, RedisLeadListCache>();
+            services.AddSingleton<InMemoryUserRepository>();
+            services.AddSingleton<IUserRepository>(provider => provider.GetRequiredService<InMemoryUserRepository>());
+            services.AddSingleton<IUserPasswordRepository>(provider => provider.GetRequiredService<InMemoryUserRepository>());
+            services.AddSingleton<IRefreshTokenRepository, InMemoryRefreshTokenRepository>();
+            services.AddSingleton<IOutboxRepository, NoOpOutboxRepository>();
+            services.AddSingleton<IAuditTrailRepository, NoOpAuditTrailRepository>();
+            services.AddSingleton<ILeadScoringService, NoOpLeadScoringService>();
 
             services.RemoveAll(typeof(IDistributedCache));
             services.AddDistributedMemoryCache();

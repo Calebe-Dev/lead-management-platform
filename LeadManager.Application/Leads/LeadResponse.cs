@@ -13,6 +13,7 @@ public sealed record LeadResponse(
     string ProductInterest,
     string Cnpj,
     string AssignedTo,
+    Guid? CampaignId,
     int Score,
     string Temperature,
     string Status,

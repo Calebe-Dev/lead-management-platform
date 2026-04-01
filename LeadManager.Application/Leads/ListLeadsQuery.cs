@@ -11,6 +11,7 @@ public sealed class ListLeadsQuery
     public string? ProductInterest { get; init; }
     public string? AssignedTo { get; init; }
     public string? Search { get; init; }
+    public Guid? CampaignId { get; init; }
     public int? MinScore { get; init; }
     public int? MaxScore { get; init; }
     public int Page { get; init; } = 1;

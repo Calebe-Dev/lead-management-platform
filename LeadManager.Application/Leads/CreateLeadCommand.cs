@@ -10,4 +10,5 @@ public sealed record CreateLeadCommand(
     string Region,
     string? LeadType,
     string? ProductInterest,
-    string? Cnpj);
+    string? Cnpj,
+    Guid? CampaignId);

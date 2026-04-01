@@ -11,6 +11,10 @@ public sealed class LeadManagerDbContext : DbContext
     internal DbSet<LeadRecord> Leads => Set<LeadRecord>();
     internal DbSet<LeadHistoryRecord> LeadHistory => Set<LeadHistoryRecord>();
     internal DbSet<RoundRobinStateRecord> RoundRobinStates => Set<RoundRobinStateRecord>();
+    internal DbSet<CampaignRecord> Campaigns => Set<CampaignRecord>();
+    internal DbSet<UserRecord> Users => Set<UserRecord>();
+    internal DbSet<RefreshTokenRecord> RefreshTokens => Set<RefreshTokenRecord>();
+    internal DbSet<OutboxMessageRecord> OutboxMessages => Set<OutboxMessageRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

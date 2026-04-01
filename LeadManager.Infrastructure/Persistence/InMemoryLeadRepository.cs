@@ -121,6 +121,11 @@ public sealed class InMemoryLeadRepository : ILeadRepository
                     || lead.Company.Contains(search, StringComparison.OrdinalIgnoreCase));
             }
 
+            if (query.CampaignId.HasValue)
+            {
+                filtered = filtered.Where(lead => lead.CampaignId == query.CampaignId.Value);
+            }
+
             var totalItems = filtered.Count();
             var items = filtered.OrderByDescending(x => x.CreatedAtUtc)
                 .Skip((query.Page - 1) * query.PageSize)
@@ -143,6 +148,15 @@ public sealed class InMemoryLeadRepository : ILeadRepository
         }
 
         return Task.CompletedTask;
+    }
+
+    public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        lock (Sync)
+        {
+            var removed = Leads.RemoveAll(lead => lead.Id == id) > 0;
+            return Task.FromResult(removed);
+        }
     }
 
     private static string NormalizeDigits(string value)

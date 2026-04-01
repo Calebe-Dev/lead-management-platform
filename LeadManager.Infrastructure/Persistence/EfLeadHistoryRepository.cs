@@ -1,4 +1,5 @@
 using LeadManager.Application.Abstractions;
+using LeadManager.Application.Leads;
 using LeadManager.Domain.Leads;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,19 +26,32 @@ public sealed class EfLeadHistoryRepository : ILeadHistoryRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<LeadHistoryEntry>> ListByLeadIdAsync(Guid leadId, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<LeadHistoryEntry>> ListByLeadIdAsync(
+        Guid leadId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
     {
         if (leadId == Guid.Empty)
         {
             throw new ArgumentException("Lead id is required.", nameof(leadId));
         }
 
-        var records = await _dbContext.LeadHistory
+        var query = _dbContext.LeadHistory
             .AsNoTracking()
             .Where(entry => entry.LeadId == leadId)
-            .OrderByDescending(entry => entry.ChangedAtUtc)
+            .OrderByDescending(entry => entry.ChangedAtUtc);
+
+        var totalItems = await query.CountAsync(cancellationToken);
+        var records = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        return records.Select(entry => entry.ToDomain()).ToArray();
+        return new PagedResult<LeadHistoryEntry>(
+            records.Select(entry => entry.ToDomain()).ToArray(),
+            page,
+            pageSize,
+            totalItems);
     }
 }

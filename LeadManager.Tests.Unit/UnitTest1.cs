@@ -1,4 +1,5 @@
 using LeadManager.Application.Abstractions;
+using LeadManager.Application.Auth;
 using LeadManager.Application.Leads;
 using LeadManager.Domain.Leads;
 
@@ -67,7 +68,7 @@ public sealed class LeadApplicationUseCaseTests
             "CRM",
             ""));
 
-        var useCase = new CreateLeadUseCase(repository, history, assignment, cache);
+        var useCase = new CreateLeadUseCase(repository, history, assignment, cache, new FakeLeadScoringService(), new FakeOutboxRepository(), new FakeAuditTrailRepository());
 
         var ex = await Assert.ThrowsAsync<DuplicateLeadException>(() => useCase.ExecuteAsync(new CreateLeadCommand(
             "New Lead",
@@ -79,6 +80,7 @@ public sealed class LeadApplicationUseCaseTests
             "South",
             "SMB",
             "CRM",
+            null,
             null)));
 
         Assert.Contains("email", ex.MatchedFields);
@@ -91,7 +93,7 @@ public sealed class LeadApplicationUseCaseTests
         var history = new FakeLeadHistoryRepository();
         var assignment = new FakeLeadAssignmentService("ana.silva");
         var cache = new FakeLeadListCache();
-        var useCase = new CreateLeadUseCase(repository, history, assignment, cache);
+        var useCase = new CreateLeadUseCase(repository, history, assignment, cache, new FakeLeadScoringService(), new FakeOutboxRepository(), new FakeAuditTrailRepository());
 
         var response = await useCase.ExecuteAsync(new CreateLeadCommand(
             "Jane Doe",
@@ -103,7 +105,8 @@ public sealed class LeadApplicationUseCaseTests
             "South",
             "Enterprise",
             "CRM",
-            "12.345.678/0001-90"));
+            "12.345.678/0001-90",
+            null));
 
         Assert.Equal("ana.silva", response.AssignedTo);
         Assert.True(history.Entries.Count >= 4);
@@ -130,7 +133,7 @@ public sealed class LeadApplicationUseCaseTests
             "");
 
         await repository.AddAsync(lead);
-        var useCase = new UpdateLeadStatusUseCase(repository, history, cache);
+        var useCase = new UpdateLeadStatusUseCase(repository, history, cache, new FakeOutboxRepository(), new FakeAuditTrailRepository());
 
         var response = await useCase.ExecuteAsync(lead.Id, new UpdateLeadStatusCommand(LeadStatus.InService));
 
@@ -245,6 +248,12 @@ internal sealed class FakeLeadRepository : ILeadRepository
         return Task.CompletedTask;
     }
 
+    public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var deleted = _leads.RemoveAll(existingLead => existingLead.Id == id) > 0;
+        return Task.FromResult(deleted);
+    }
+
     private static string NormalizeDigits(string value)
     {
         if (string.IsNullOrWhiteSpace(value)) return string.Empty;
@@ -262,10 +271,10 @@ internal sealed class FakeLeadHistoryRepository : ILeadHistoryRepository
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyCollection<LeadHistoryEntry>> ListByLeadIdAsync(Guid leadId, CancellationToken cancellationToken = default)
+    public Task<PagedResult<LeadHistoryEntry>> ListByLeadIdAsync(Guid leadId, int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        IReadOnlyCollection<LeadHistoryEntry> items = Entries.Where(x => x.LeadId == leadId).ToArray();
-        return Task.FromResult(items);
+        var items = Entries.Where(x => x.LeadId == leadId).ToArray();
+        return Task.FromResult(new PagedResult<LeadHistoryEntry>(items, page, pageSize, items.Length));
     }
 }
 
@@ -309,4 +318,37 @@ internal sealed class FakeLeadListCache : ILeadListCache
         _cache.Clear();
         return Task.CompletedTask;
     }
+}
+
+internal sealed class FakeLeadScoringService : ILeadScoringService
+{
+    public Task<int?> ScoreAsync(Lead lead, CancellationToken cancellationToken = default) =>
+        Task.FromResult<int?>(null);
+}
+
+internal sealed class FakeOutboxRepository : IOutboxRepository
+{
+    public Task EnqueueAsync(string eventType, string payloadJson, string idempotencyKey, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+
+    public Task<IReadOnlyCollection<OutboxMessage>> DequeuePendingAsync(int batchSize, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyCollection<OutboxMessage>>([]);
+
+    public Task MarkProcessedAsync(Guid id, DateTime processedAtUtc, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+
+    public Task MarkFailedAsync(Guid id, string errorMessage, int nextRetryInSeconds, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+}
+
+internal sealed class FakeAuditTrailRepository : IAuditTrailRepository
+{
+    public Task WriteInteractionAsync(InteractionAuditRecord record, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+
+    public Task WriteBehaviorEventAsync(BehaviorEventRecord record, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+
+    public Task WriteAiDecisionAsync(AiDecisionRecord record, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
 }

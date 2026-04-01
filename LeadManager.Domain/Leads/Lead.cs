@@ -17,6 +17,7 @@ public sealed class Lead
     public string ProductInterest { get; private set; }
     public string Cnpj { get; private set; }
     public string AssignedTo { get; private set; }
+    public Guid? CampaignId { get; private set; }
     public int Score { get; private set; }
     public LeadTemperature Temperature { get; private set; }
     public LeadStatus Status { get; private set; }
@@ -36,6 +37,7 @@ public sealed class Lead
         string productInterest,
         string cnpj,
         string assignedTo,
+        Guid? campaignId,
         int score,
         LeadTemperature temperature,
         LeadStatus status,
@@ -54,6 +56,7 @@ public sealed class Lead
         ProductInterest = productInterest;
         Cnpj = cnpj;
         AssignedTo = assignedTo;
+        CampaignId = campaignId;
         Score = score;
         Temperature = temperature;
         Status = status;
@@ -72,6 +75,7 @@ public sealed class Lead
         string leadType,
         string productInterest,
         string cnpj,
+        Guid? campaignId = null,
         DateTime? createdAtUtc = null)
     {
         var normalizedName = ValidateName(name);
@@ -99,6 +103,7 @@ public sealed class Lead
             normalizedProductInterest,
             normalizedCnpj,
             string.Empty,
+            campaignId,
             0,
             LeadTemperature.Cold,
             LeadStatus.New,
@@ -122,6 +127,7 @@ public sealed class Lead
         string productInterest,
         string cnpj,
         string assignedTo,
+        Guid? campaignId,
         int score,
         LeadTemperature temperature,
         LeadStatus status,
@@ -156,6 +162,7 @@ public sealed class Lead
             NormalizeOptional(productInterest),
             ValidateCnpj(cnpj),
             NormalizeOptional(assignedTo),
+            campaignId,
             score < 0 ? throw new ArgumentOutOfRangeException(nameof(score), "Lead score cannot be negative.") : score,
             temperature,
             status,
@@ -228,6 +235,91 @@ public sealed class Lead
         AssignedTo = normalizedAssignee;
         Touch();
     }
+
+    public void AssignCampaign(Guid? campaignId)
+    {
+        if (CampaignId == campaignId)
+        {
+            return;
+        }
+
+        CampaignId = campaignId;
+        Touch();
+    }
+
+    public void MergeFrom(Lead source, LeadMergePrecedence precedence)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        if (source.Id == Id)
+        {
+            throw new InvalidOperationException("A lead cannot be merged with itself.");
+        }
+
+        if (PrecedenceIsSource(precedence))
+        {
+            Name = source.Name;
+            Email = source.Email;
+            Phone = source.Phone;
+            Company = source.Company;
+            JobTitle = source.JobTitle;
+            Source = source.Source;
+            Region = source.Region;
+            LeadType = source.LeadType;
+            ProductInterest = source.ProductInterest;
+            Cnpj = source.Cnpj;
+            if (!string.IsNullOrWhiteSpace(source.AssignedTo))
+            {
+                AssignedTo = source.AssignedTo;
+            }
+
+            if (source.CampaignId.HasValue)
+            {
+                CampaignId = source.CampaignId;
+            }
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(Company) && !string.IsNullOrWhiteSpace(source.Company))
+            {
+                Company = source.Company;
+            }
+
+            if (string.IsNullOrWhiteSpace(JobTitle) && !string.IsNullOrWhiteSpace(source.JobTitle))
+            {
+                JobTitle = source.JobTitle;
+            }
+
+            if (string.IsNullOrWhiteSpace(LeadType) && !string.IsNullOrWhiteSpace(source.LeadType))
+            {
+                LeadType = source.LeadType;
+            }
+
+            if (string.IsNullOrWhiteSpace(ProductInterest) && !string.IsNullOrWhiteSpace(source.ProductInterest))
+            {
+                ProductInterest = source.ProductInterest;
+            }
+
+            if (string.IsNullOrWhiteSpace(Cnpj) && !string.IsNullOrWhiteSpace(source.Cnpj))
+            {
+                Cnpj = source.Cnpj;
+            }
+
+            if (string.IsNullOrWhiteSpace(AssignedTo) && !string.IsNullOrWhiteSpace(source.AssignedTo))
+            {
+                AssignedTo = source.AssignedTo;
+            }
+
+            if (!CampaignId.HasValue && source.CampaignId.HasValue)
+            {
+                CampaignId = source.CampaignId;
+            }
+        }
+
+        ApplyScore(Math.Max(Score, source.Score));
+    }
+
+    private static bool PrecedenceIsSource(LeadMergePrecedence precedence) =>
+        precedence == LeadMergePrecedence.Source;
 
     private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
 

@@ -42,6 +42,7 @@ public sealed class AuthAndLeadFlowTests : IClassFixture<ApiTestWebApplicationFa
             "South",
             "Enterprise",
             "CRM",
+            null,
             null));
         var createBody = await createResponse.Content.ReadAsStringAsync();
         Assert.True(createResponse.StatusCode == HttpStatusCode.Created, $"Expected Created but got {createResponse.StatusCode}. Body: {createBody}");
@@ -79,6 +80,7 @@ public sealed class AuthAndLeadFlowTests : IClassFixture<ApiTestWebApplicationFa
             "South",
             "SMB",
             "CRM",
+            null,
             null));
         var createBody = await createResponse.Content.ReadAsStringAsync();
         Assert.True(createResponse.StatusCode == HttpStatusCode.Created, $"Expected Created but got {createResponse.StatusCode}. Body: {createBody}");
@@ -112,5 +114,9 @@ public sealed class AuthAndLeadFlowTests : IClassFixture<ApiTestWebApplicationFa
         return payload.AccessToken;
     }
 
-    private sealed record TokenPayload(string AccessToken, DateTime ExpiresAtUtc);
+    private sealed record TokenPayload(
+        string AccessToken,
+        DateTime AccessTokenExpiresAtUtc,
+        string RefreshToken,
+        DateTime RefreshTokenExpiresAtUtc);
 }

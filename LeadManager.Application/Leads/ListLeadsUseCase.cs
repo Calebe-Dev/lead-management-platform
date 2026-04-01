@@ -65,10 +65,11 @@ public sealed class ListLeadsUseCase
         var productInterest = NormalizeToken(query.ProductInterest);
         var assignedTo = NormalizeToken(query.AssignedTo);
         var search = NormalizeToken(query.Search);
+        var campaignId = query.CampaignId?.ToString() ?? "*";
         var minScore = query.MinScore?.ToString() ?? "*";
         var maxScore = query.MaxScore?.ToString() ?? "*";
 
-        return $"leads:list:{status}:{temperature}:{region}:{leadType}:{productInterest}:{assignedTo}:{search}:{minScore}:{maxScore}:{query.Page}:{query.PageSize}";
+        return $"leads:list:{status}:{temperature}:{region}:{leadType}:{productInterest}:{assignedTo}:{search}:{campaignId}:{minScore}:{maxScore}:{query.Page}:{query.PageSize}";
     }
 
     private static string NormalizeToken(string? value) =>

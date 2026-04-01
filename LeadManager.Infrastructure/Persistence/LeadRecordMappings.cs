@@ -19,6 +19,7 @@ internal static class LeadRecordMappings
             ProductInterest = lead.ProductInterest,
             Cnpj = lead.Cnpj,
             AssignedTo = lead.AssignedTo,
+            CampaignId = lead.CampaignId,
             Score = lead.Score,
             Temperature = (int)lead.Temperature,
             Status = (int)lead.Status,
@@ -40,6 +41,7 @@ internal static class LeadRecordMappings
             lead.ProductInterest,
             lead.Cnpj,
             lead.AssignedTo,
+            lead.CampaignId,
             lead.Score,
             (LeadTemperature)lead.Temperature,
             (LeadStatus)lead.Status,
@@ -59,6 +61,7 @@ internal static class LeadRecordMappings
         record.ProductInterest = lead.ProductInterest;
         record.Cnpj = lead.Cnpj;
         record.AssignedTo = lead.AssignedTo;
+        record.CampaignId = lead.CampaignId;
         record.Score = lead.Score;
         record.Temperature = (int)lead.Temperature;
         record.Status = (int)lead.Status;

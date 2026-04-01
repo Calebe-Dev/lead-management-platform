@@ -82,4 +82,25 @@ jobs:
         run: docker compose config
 
       - name: Build API and frontend images
-        run: docker compose build api frontend
+        run: docker compose build api worker frontend
+
+  kubernetes:
+    name: Kubernetes Manifests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - backend
+      - frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+
+      - name: Render kustomization
+        run: |
+          kubectl kustomize k8s > /tmp/k8s-rendered.yaml
+          test -s /tmp/k8s-rendered.yaml

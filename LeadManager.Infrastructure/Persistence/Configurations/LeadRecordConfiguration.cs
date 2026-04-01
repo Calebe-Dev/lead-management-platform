@@ -82,6 +82,14 @@ internal sealed class LeadRecordConfiguration : IEntityTypeConfiguration<LeadRec
             .HasMaxLength(200)
             .IsRequired();
 
+        builder.Property(lead => lead.CampaignId)
+            .HasColumnName("campaign_id")
+            .HasColumnType("uuid")
+            .IsRequired(false);
+
+        builder.HasIndex(lead => lead.CampaignId)
+            .HasDatabaseName("ix_leads_campaign_id");
+
         builder.Property(lead => lead.Score)
             .HasColumnName("score")
             .IsRequired();

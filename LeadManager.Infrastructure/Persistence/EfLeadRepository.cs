@@ -132,6 +132,11 @@ public sealed class EfLeadRepository : ILeadRepository
                 || lead.Company.ToLower().Contains(search));
         }
 
+        if (query.CampaignId.HasValue)
+        {
+            queryable = queryable.Where(lead => lead.CampaignId == query.CampaignId.Value);
+        }
+
         var totalItems = await queryable.CountAsync(cancellationToken);
         var records = await queryable
             .OrderByDescending(lead => lead.CreatedAtUtc)
@@ -160,6 +165,25 @@ public sealed class EfLeadRepository : ILeadRepository
 
         existingRecord.UpdateFromDomain(lead);
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentException("Lead id is required.", nameof(id));
+        }
+
+        var existingRecord = await _dbContext.Leads
+            .FirstOrDefaultAsync(existingLead => existingLead.Id == id, cancellationToken);
+        if (existingRecord is null)
+        {
+            return false;
+        }
+
+        _dbContext.Leads.Remove(existingRecord);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     private static string NormalizeDigits(string value)
